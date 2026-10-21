@@ -1,0 +1,36 @@
+// 67130500001 - Practice Student
+import * as service from "../services-67130500001/ticket-service.js"
+import express from "express"
+import {apiResponse} from "../mappers-67130500001/api-response.js"
+import httpStatus from "http-status"
+
+const router = express.Router()
+
+router.get("/", async (req, res) => {
+    const pagination = req.pagination
+    return apiResponse(res, await service.getAllObjects(pagination, req.query), pagination)
+})
+
+router.get("/:id", async (req, res) => {
+    return apiResponse(res, await service.getObject(req.params.id))
+})
+
+router.post("/", async (req, res) => {
+    return apiResponse(res, await service.createObject(req.body), null, httpStatus.CREATED)
+})
+
+// การเปลี่ยนช่าง/สถานะแยกเป็น endpoint ของตัวเอง เพื่อให้ผ่านกฎทุกครั้ง (ไม่มี PUT แก้ทั้งก้อน)
+router.patch("/:id/assign", async (req, res) => {
+    return apiResponse(res, await service.assign(req.params.id, req.body))
+})
+
+router.patch("/:id/status", async (req, res) => {
+    return apiResponse(res, await service.changeStatus(req.params.id, req.body))
+})
+
+router.delete("/:id", async (req, res) => {
+    await service.removeObject(req.params.id)
+    res.status(httpStatus.NO_CONTENT).end()
+})
+
+export default router
