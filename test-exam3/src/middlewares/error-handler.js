@@ -2,11 +2,14 @@
 
 import httpStatus from "http-status";
 Error.stackTraceLimit = 1 // ตัด stack trace เหลือ บรรทัดเดียว
+// เพิ่ม errorCode (กำหนด code เองได้ เช่น VALIDATION_ERROR) และ details (รายการฟิลด์ที่ผิด)
+// ถ้าไม่ส่ง errorCode จะใช้ชื่อจาก http-status เหมือนเดิม
 export class AppError extends Error {
-    constructor(message, statusCode) {
+    constructor(message, statusCode, errorCode = httpStatus[statusCode], details) {
         super(message);
         this.statusCode = statusCode;
-        this.errorCode = httpStatus[statusCode];
+        this.errorCode = errorCode;
+        this.details = details;
         Error.captureStackTrace(this, this.constructor);
     }
 }
@@ -36,8 +39,9 @@ export const errorHandler = (err, req, res, next) => {
         success: false,
         error: {
             code: errorCode,
-            message: message
+            message: message,
+            details: err.details // undefined จะถูกตัดออกตอน JSON.stringify
         },
         timestamp: new Date().toISOString()
     });
-};
+};

@@ -7,6 +7,7 @@ const ENTITY_NAME = "menuItem";
 
 const COUNT_ALL = `SELECT COUNT(*) as total FROM ${TABLE_NAME}`;
 const FIND_ALL_SQL = `SELECT * FROM ${TABLE_NAME}`;
+// Detail ต้องมี categoryName จึงต้อง JOIN categories
 const FIND_ONE_SQL = `SELECT m.*, c.name AS category_name
   FROM ${TABLE_NAME} m
   JOIN categories c ON c.id = m.category_id
@@ -26,7 +27,8 @@ export async function findAll(pagination) {
     const [datas] = await db.query(FIND_ALL_SQL);
     return datas;
   }
-  const SQL = FIND_ALL_SQL + " LIMIT ? OFFSET ?";
+  // ต้อง ORDER BY id ไม่งั้น MySQL ไม่การันตีลำดับ หน้า 2/3 อาจได้ id ไม่ต่อเนื่อง
+  const SQL = FIND_ALL_SQL + " ORDER BY id LIMIT ? OFFSET ?";
   const { limit, offset } = pagination;
   const [datas] = await db.query(SQL, [limit, offset]);
   datas.totalItems = await count();
@@ -44,6 +46,7 @@ export async function findOne(id) {
   return data[0];
 }
 
+// UPDATE ... SET ? ของ mysql2 จะแปลง object เป็น `col = val` เฉพาะ key ที่ส่งมา จึงรองรับ partial update ได้เลย
 export async function update(id, data) {
   await findOne(id);
   await db.query(UPDATE_SQL, [data, id]);
@@ -58,6 +61,7 @@ export async function remove(id) {
 
 export async function create(data) {
   const key = data.sku;
+  // เช็ค sku ซ้ำก่อน insert → 409 (ถึงไม่เช็ค UNIQUE ใน DB ก็จะโยน ER_DUP_ENTRY ซึ่ง error-handler แปลงเป็น 409 ให้อยู่แล้ว)
   const [existingItem] = await db.query(FIND_BY_SKU_SQL, [key]);
   if (existingItem.length != 0) {
     throw new AppError(

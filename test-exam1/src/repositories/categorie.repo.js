@@ -6,11 +6,8 @@ const TABLE_NAME = "categories";
 const ENTITY_NAME = "Categorie";
 
 const COUNT_ALL = `SELECT COUNT(*) as total FROM ${TABLE_NAME}`;
-const FIND_ALL_SQL = `SELECT * FROM ${TABLE_NAME}`;
+const FIND_ALL_SQL = `SELECT * FROM ${TABLE_NAME} ORDER BY id`;
 const FIND_ONE_SQL = `SELECT * FROM ${TABLE_NAME} WHERE id = ?`;
-const UPDATE_SQL = `UPDATE ${TABLE_NAME} SET ? WHERE id = ?`;
-const REMOVE_SQL = `DELETE FROM ${TABLE_NAME} WHERE id = ?`;
-const CREATE_SQL = `INSERT INTO ${TABLE_NAME} SET ?`;
 
 async function count() {
   const [[{ total }]] = await db.query(COUNT_ALL);
@@ -38,30 +35,4 @@ export async function findOne(id) {
     );
   }
   return data[0];
-}
-
-export async function update(id, data) {
-  await findOne(id);
-  await db.query(UPDATE_SQL, [data, id]);
-  return findOne(id);
-}
-
-export async function remove(id) {
-  await findOne(id);
-  const [data] = await db.query(REMOVE_SQL, [id]);
-  return data;
-}
-
-export async function create(data) {
-  const key = data.productLine;
-  const [existingItem] = await db.query(FIND_ONE_SQL, [key]);
-  if (existingItem.length != 0) {
-    throw new AppError(
-      `Product line '${key}' already exists`,
-      httpStatus.CONFLICT,
-    );
-  }
-  const [result] = await db.query(CREATE_SQL, [data]);
-  // console.log(result)
-  return findOne(key);
 }

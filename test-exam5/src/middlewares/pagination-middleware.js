@@ -1,19 +1,21 @@
 //src/middlewares/pagination-middleware.js
+import { AppError } from "./error-handler.js";
+import httpStatus from "http-status";
+
+// ต่างจาก template: ไม่ส่ง page/limit ก็ต้องแบ่งหน้า (default page 1, limit 20)
+// และค่าที่ผิด (0, ติดลบ, ไม่ใช่ตัวเลข, limit > 100) ต้องตอบ 400 ไม่ใช่ตัด/ปัดค่าให้
+const isPositiveInt = (v) => /^\d+$/.test(v) && Number(v) >= 1;
 
 export const queryParser = () => {
     return (req, res, next) => {
-        const query = req.query || {};
-        if (!query || query.page == undefined || query.limit == undefined) {
-            req.pagination = null
-            return next();
+        const { page = "1", limit = "20" } = req.query;
+        if (!isPositiveInt(page)) {
+            return next(new AppError("page must be an integer >= 1", httpStatus.BAD_REQUEST));
         }
-        let page = query.page || 1 //if empty, null set to 1
-        const pageSize = query.limit || 20
-        // console.log('page: ', page, 'size: ', pageSize)
-        page = Math.max(parseInt(page), 1) //if page is negative
-        const limit = Math.min(parseInt(pageSize), 100) //if page size > 100
-        const offset = (page - 1) * pageSize
-        req.pagination = {page, limit, offset}
+        if (!isPositiveInt(limit) || Number(limit) > 100) {
+            return next(new AppError("limit must be an integer between 1 and 100", httpStatus.BAD_REQUEST));
+        }
+        req.pagination = { page: Number(page), limit: Number(limit), offset: (page - 1) * limit };
         next();
     }
 }

@@ -7,8 +7,8 @@ export default class ProductMapper {
       sku: entity.sku,
       name: entity.name,
       categoryId: entity.category_id,
-      price: Number(entity.price),
-      isAvailable: Boolean(entity.is_available),
+      price: Number(entity.price), // DECIMAL จาก mysql2 เป็น string ต้องแปลงเป็น number
+      isAvailable: Boolean(entity.is_available), // BOOLEAN ใน MySQL คือ 0/1
     };
   }
 
@@ -19,12 +19,11 @@ export default class ProductMapper {
       sku: entity.sku,
       name: entity.name,
       categoryId: entity.category_id,
-      categoryName: entity.category_name,
+      categoryName: entity.category_name, // มาจาก JOIN categories ใน repo
       price: Number(entity.price),
       calories: entity.calories,
       size: entity.size,
       isAvailable: Boolean(entity.is_available),
-      color: entity.color,
       createdAt: entity.created_at,
     };
   }
@@ -43,7 +42,8 @@ export default class ProductMapper {
     } else {
       entitiesMap = entities.map((item) => this.toSummaryDTO(item));
     }
-    if (totalItems) {
+    // เช็ค !== undefined แทน truthy เพราะถ้า filter แล้วได้ 0 รายการ total ต้องเป็น 0 ไม่ใช่หายไป
+    if (totalItems !== undefined) {
       entitiesMap.totalItems = totalItems;
     }
     return entitiesMap;

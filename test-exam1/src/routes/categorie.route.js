@@ -4,6 +4,7 @@ import { apiResponse } from "../mappers/api-response.js";
 
 const router = express.Router();
 
+// categories ส่งข้อมูลดิบจากตาราง (snake_case) ได้เลย ไม่ต้องมี DTO
 router.get("/", async (req, res) => {
   const pagination = req.pagination;
   const objects = await service.getAllObjects(pagination);
@@ -14,22 +15,6 @@ router.get("/:id", async (req, res) => {
   const id = req.params.id;
   const object = await service.getObject(id);
   apiResponse(res, object);
-});
-
-router.post("/", async (req, res) => {
-  const object = req.body;
-  const result = await service.createObject(object);
-  res.status(201).json({ result });
-});
-router.put("/:id", async (req, res) => {
-  const id = req.params.id;
-  const object = await service.updateObject(id, req.body);
-  res.json(object);
-});
-router.delete("/:id", async (req, res) => {
-  const id = req.params.id;
-  await service.removeObject(id);
-  res.status(204).end();
 });
 
 export default router;
