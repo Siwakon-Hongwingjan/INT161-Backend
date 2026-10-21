@@ -1,0 +1,108 @@
+{
+  "timestamp": "2026-10-15T03:54:23.223Z",
+  "student": {
+    "id": "67130500001",
+    "name": "Unknown Student",
+    "secretKey": "N/A"
+  },
+  "totalScore": 100,
+  "maxScore": 100,
+  "results": [
+    {
+      "name": "Student Identity Endpoint",
+      "category": "1. Identity",
+      "points": 10,
+      "maxPoints": 10,
+      "passed": true,
+      "duration": 15
+    },
+    {
+      "name": "GET All Brands (List)",
+      "category": "2. Brands API",
+      "points": 5,
+      "maxPoints": 5,
+      "passed": true,
+      "duration": 62
+    },
+    {
+      "name": "GET Brand by ID & 404 Check",
+      "category": "2. Brands API",
+      "points": 5,
+      "maxPoints": 5,
+      "passed": true,
+      "duration": 14
+    },
+    {
+      "name": "GET Products Pagination Envelope",
+      "category": "3. Products Query",
+      "points": 15,
+      "maxPoints": 15,
+      "passed": true,
+      "duration": 12
+    },
+    {
+      "name": "Summary DTO Filtering (GET /products)",
+      "category": "3. Products Query",
+      "points": 10,
+      "maxPoints": 10,
+      "passed": true,
+      "duration": 9
+    },
+    {
+      "name": "GET Product by ID & Detail DTO",
+      "category": "3. Products Query",
+      "points": 10,
+      "maxPoints": 10,
+      "passed": true,
+      "duration": 13
+    },
+    {
+      "name": "POST Create Product (201 Created)",
+      "category": "4. Products Modify",
+      "points": 10,
+      "maxPoints": 10,
+      "passed": true,
+      "duration": 22
+    },
+    {
+      "name": "PUT Update Product (200 OK)",
+      "category": "4. Products Modify",
+      "points": 10,
+      "maxPoints": 10,
+      "passed": true,
+      "duration": 9
+    },
+    {
+      "name": "DELETE Product (204 No Content)",
+      "category": "4. Products Modify",
+      "points": 10,
+      "maxPoints": 10,
+      "passed": true,
+      "duration": 8
+    },
+    {
+      "name": "Duplicate SKU Conflict Handling (409 Conflict)",
+      "category": "5. Standards & Error",
+      "points": 5,
+      "maxPoints": 5,
+      "passed": true,
+      "duration": 7
+    },
+    {
+      "name": "Standard JSON Envelope Format",
+      "category": "5. Standards & Error",
+      "points": 5,
+      "maxPoints": 5,
+      "passed": true,
+      "duration": 5
+    },
+    {
+      "name": "RESTful Clean Route Hierarchy",
+      "category": "5. Standards & Error",
+      "points": 5,
+      "maxPoints": 5,
+      "passed": true,
+      "duration": 10
+    }
+  ]
+}

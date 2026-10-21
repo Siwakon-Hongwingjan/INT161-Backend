@@ -1,0 +1,37 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Book {
+  id        Int      @id @default(autoincrement())
+  title     String
+  author    String
+  copies    Int      @default(1) // จำนวนเล่มทั้งหมดที่มี
+  loans     Loan[]
+  createdAt DateTime @default(now())
+}
+
+model Member {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  loans     Loan[]
+  createdAt DateTime @default(now())
+}
+
+model Loan {
+  id         Int       @id @default(autoincrement())
+  book       Book      @relation(fields: [bookId], references: [id])
+  bookId     Int
+  member     Member    @relation(fields: [memberId], references: [id])
+  memberId   Int
+  borrowedAt DateTime  @default(now())
+  returnedAt DateTime? // null = ยังไม่คืน
+}
