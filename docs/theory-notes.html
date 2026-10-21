@@ -1,0 +1,760 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>INT161 Backend Theory Notes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky chapter bar, single reading column, diagrams built from flex "flow" nodes that stack on phones */
+:root{
+  --bg:#f2f6f8; --surface:#ffffff; --fg:#13222c; --muted:#53666f; --line:#d3dee3;
+  --accent:#0a7c78; --accent-soft:#d9efed; --warn:#b45309; --warn-soft:#fdecd2;
+  --bad:#b4233a; --bad-soft:#fbe0e5; --good:#1d7a45; --good-soft:#dcf1e4; --code-bg:#0f1e27; --code-fg:#dbe9ef;
+  --f-display:"Bai Jamjuree","IBM Plex Sans Thai",sans-serif;
+  --f-body:"IBM Plex Sans Thai","Noto Sans Thai",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c161d; --surface:#142530; --fg:#e4eef2; --muted:#9bb0ba; --line:#274150;
+  --accent:#3fc5bd; --accent-soft:#12403f; --warn:#f0a95a; --warn-soft:#3d2b12;
+  --bad:#f08a9b; --bad-soft:#42171f; --good:#6fd39a; --good-soft:#12361f; --code-bg:#081116; --code-fg:#d3e4ea; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c161d; --surface:#142530; --fg:#e4eef2; --muted:#9bb0ba; --line:#274150;
+  --accent:#3fc5bd; --accent-soft:#12403f; --warn:#f0a95a; --warn-soft:#3d2b12;
+  --bad:#f08a9b; --bad-soft:#42171f; --good:#6fd39a; --good-soft:#12361f; --code-bg:#081116; --code-fg:#d3e4ea; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.75;
+  padding-block:0 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:860px;margin-inline:auto}
+h1,h2,h3{font-family:var(--f-display);line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:clamp(28px,6vw,44px)}
+h2{font-size:clamp(23px,4vw,30px);padding-top:8px}
+h3{font-size:19px;margin-top:28px;margin-bottom:6px}
+p{margin:10px 0}
+a{color:var(--accent)}
+code{font-family:var(--f-mono);font-size:.88em;background:var(--accent-soft);padding:1px 6px;border-radius:4px;overflow-wrap:anywhere}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.top{padding-block:40px 20px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+header.top p{color:var(--muted);max-width:62ch}
+
+nav.chapters{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
+  margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px));}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+nav.chapters .row{display:flex;gap:6px;overflow-x:auto;padding-block:10px;max-width:860px;margin-inline:auto;scrollbar-width:thin}
+nav.chapters a{flex:none;text-decoration:none;color:var(--fg);font-size:14px;padding:4px 12px;border:1px solid var(--line);border-radius:99px;background:var(--surface)}
+nav.chapters a:hover{border-color:var(--accent);color:var(--accent)}
+
+section{padding-block:36px 8px;scroll-margin-top:60px}
+.week{font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+/* callouts: slide content vs added content */
+.note{border-left:4px solid var(--accent);background:var(--accent-soft);padding:10px 16px;border-radius:0 8px 8px 0;margin:16px 0}
+.note b.tag{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:block;color:var(--accent)}
+.note.extra{border-color:var(--warn);background:var(--warn-soft)} .note.extra b.tag{color:var(--warn)}
+.note.bad{border-color:var(--bad);background:var(--bad-soft)} .note.bad b.tag{color:var(--bad)}
+.note p{margin:4px 0}
+
+/* diagrams */
+figure{margin:20px 0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+figcaption{font-size:13px;color:var(--muted);margin-top:12px}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:8px}
+.node{flex:1 1 120px;min-width:0;border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;text-align:center;font-size:14px;line-height:1.45;background:var(--bg)}
+.node small{display:block;color:var(--muted);font-size:12px}
+.node.a{border-color:var(--accent);background:var(--accent-soft)}
+.node.w{border-color:var(--warn);background:var(--warn-soft)}
+.node.r{border-color:var(--bad);background:var(--bad-soft)}
+.node.g{border-color:var(--good);background:var(--good-soft)}
+.arr{align-self:center;color:var(--muted);font-family:var(--f-mono);flex:none}
+.stack{display:flex;flex-direction:column;gap:6px;max-width:460px;margin-inline:auto}
+.stack .arr{text-align:center;line-height:1}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.two>*{min-width:0}
+.panel{border:1px solid var(--line);border-radius:10px;padding:12px 16px;background:var(--surface)}
+.panel h4{margin:0 0 4px;font-family:var(--f-display);font-size:16px}
+.panel ul{margin:6px 0;padding-left:20px}
+
+pre{background:var(--code-bg);color:var(--code-fg);border-radius:10px;padding:14px 16px;overflow-x:auto;font-family:var(--f-mono);font-size:13.5px;line-height:1.6;margin:14px 0}
+pre code{background:none;padding:0;font-size:inherit;color:inherit}
+.k{color:#7fd3cc}.c{color:#7f98a3}.s{color:#f2c27a}
+
+.tbl{overflow-x:auto;margin:14px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--surface)}
+th,td{border:1px solid var(--line);padding:7px 11px;text-align:left;vertical-align:top}
+th{background:var(--accent-soft);font-weight:600}
+td.num,th.num{font-variant-numeric:tabular-nums}
+
+/* pagination demo */
+.pager{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:12px 0}
+.pager i{aspect-ratio:1;border-radius:4px;background:var(--bg);border:1px solid var(--line);font-style:normal;font-size:11px;display:grid;place-items:center;color:var(--muted);font-variant-numeric:tabular-nums}
+.pager i.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ctl{display:flex;flex-wrap:wrap;gap:14px;align-items:end}
+.ctl label{display:flex;flex-direction:column;font-size:13px;color:var(--muted);gap:2px}
+.ctl input{font:inherit;width:96px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+output.res{font-family:var(--f-mono);font-size:14px;display:block;margin-top:8px;overflow-wrap:anywhere}
+
+details{border:1px solid var(--line);border-radius:8px;background:var(--surface);margin:8px 0;padding:8px 14px}
+summary{cursor:pointer;font-weight:500}
+details[open] summary{margin-bottom:6px}
+.pill{display:inline-block;font-family:var(--f-mono);font-size:12px;padding:1px 8px;border-radius:99px;border:1px solid var(--line);background:var(--surface)}
+.s2{color:var(--good)}.s4{color:var(--warn)}.s5{color:var(--bad)}
+footer{margin-top:48px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">INT 161 · Basic Backend Development</div>
+  <h1>สรุปทฤษฎี Backend &amp; RESTful API</h1>
+  <p>สรุปจากสไลด์ทั้ง 7 ชุด (Intro, HTTP, REST, Database, Express, Error Handling, Pagination &amp; DTO) เรียงตามลำดับที่เรียน เน้นแนวคิดและภาพประกอบ สำหรับเตรียมสอบ Theory ข้อสอบมีทั้งปรนัยและอธิบาย</p>
+  <div class="note"><b class="tag">วิธีอ่าน</b><p>กล่องสีฟ้าคือเนื้อหาจากสไลด์ กล่องสีส้ม <b>"เสริม"</b> คือเนื้อหาที่เพิ่มให้เข้าใจครบขึ้น ไม่ได้อยู่ในสไลด์โดยตรง</p></div>
+</header>
+</div>
+
+<nav class="chapters" aria-label="สารบัญ"><div class="row">
+  <a href="#overview">ภาพรวมวิชา</a><a href="#http">1 HTTP</a><a href="#node">2 Node.js</a><a href="#rest">3 REST</a>
+  <a href="#express">4 Express</a><a href="#db">5 Database</a><a href="#error">6 Error</a><a href="#page">7 Pagination &amp; DTO</a><a href="#cheat">สรุปท้ายเล่ม</a>
+</div></nav>
+
+<div class="wrap">
+
+<!-- ============ OVERVIEW ============ -->
+<section id="overview">
+  <div class="week">Overview</div>
+  <h2>ภาพรวมวิชาและภาพใหญ่ของ Backend</h2>
+  <p>Backend คือฝั่งเซิร์ฟเวอร์ที่รับ HTTP Request จาก client ประมวลผลตามกฎธุรกิจ คุยกับฐานข้อมูล แล้วส่ง HTTP Response กลับไป ในวิชานี้ฝั่ง client คือ browser หรือ mobile app ที่ส่งและรับข้อมูลเป็น JSON</p>
+  <figure>
+    <div class="flow">
+      <div class="node">Client<small>Browser / Mobile</small></div><div class="arr">→ Request →</div>
+      <div class="node a">Backend<small>Node.js + Express</small></div><div class="arr">→ SQL →</div>
+      <div class="node">Database<small>MySQL</small></div>
+    </div>
+    <figcaption>เส้นทางข้อมูลพื้นฐาน Response ย้อนกลับมาตามเส้นทางเดิม</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <tr><th>การสอบ</th><th class="num">สัดส่วน</th><th>รูปแบบ</th></tr>
+    <tr><td>สอบครั้งที่ 2 (Theory)</td><td class="num">30%</td><td>ปรนัยเลือกคำตอบเดียว + อธิบาย</td></tr>
+    <tr><td>สอบครั้งที่ 2 (Practice)</td><td class="num">20%</td><td>เขียนโปรแกรมแก้โจทย์</td></tr>
+    <tr><td>สอบครั้งที่ 3 (Theory)</td><td class="num">30%</td><td>ปรนัยเลือกคำตอบเดียว</td></tr>
+    <tr><td>สอบครั้งที่ 3 (Practice)</td><td class="num">20%</td><td>เขียนโปรแกรมแก้โจทย์</td></tr>
+  </table></div>
+  <p>หัวข้อในวิชา: Node.js vs Bun, RESTful API, Express, เชื่อมต่อ DB, ORM/Prisma, Validation &amp; Error Handling, DTO, Filtering/Sorting/Pagination, JWT, Authentication/Authorization</p>
+</section>
+
+<!-- ============ HTTP ============ -->
+<section id="http">
+  <div class="week">Intro · Week 2</div>
+  <h2>1. Web Application และ HTTP</h2>
+
+  <h3>1.1 HTTP คืออะไร</h3>
+  <p><b>HTTP (HyperText Transfer Protocol)</b> คือโปรโตคอลที่ client กับ server ใช้สื่อสารกันบน World Wide Web client ส่ง <b>HTTP Request</b> แล้วได้ <b>HTTP Response</b> กลับมา client มักเป็น browser แต่เป็นโปรแกรมหรืออุปกรณ์ใดก็ได้ ส่วน server มักเป็นเครื่องบน cloud</p>
+
+  <figure>
+    <div class="two">
+      <div class="panel"><h4>HTTP Request</h4>
+<pre><code><span class="k">POST</span> /api/subjects HTTP/1.1
+<span class="c">Host: localhost:3000</span>
+<span class="c">Content-Type: application/json</span>
+
+{"code":"INT 161","credit":3}</code></pre>
+        <p style="font-size:14px;margin:0">ตำแหน่งที่เก็บข้อมูลได้ 3 ที่: <b>Method + URL</b>, <b>Headers</b>, <b>Body</b></p></div>
+      <div class="panel"><h4>HTTP Response</h4>
+<pre><code><span class="k">HTTP/1.1 201 Created</span>
+<span class="c">Content-Type: application/json</span>
+
+{"id":17,"code":"INT 161"}</code></pre>
+        <p style="font-size:14px;margin:0">โครงสร้าง 3 ส่วน: <b>Status Line</b>, <b>Headers</b>, <b>Message Body (Payload)</b></p></div>
+    </div>
+    <figcaption>โครงสร้างของข้อความ HTTP ทั้งสองทิศทาง</figcaption>
+  </figure>
+
+  <h3>1.2 HTTP Methods</h3>
+  <div class="tbl"><table>
+    <tr><th>Method</th><th>ใช้ทำอะไร</th><th>ตัวอย่าง</th><th>เสริม</th></tr>
+    <tr><td><code>GET</code></td><td>ดึงข้อมูล</td><td><code>/subjects</code>, <code>/subjects/{id}</code></td><td>Safe และ Idempotent</td></tr>
+    <tr><td><code>POST</code></td><td>สร้าง resource ใหม่ (มี body)</td><td><code>/subjects</code></td><td>ไม่ Idempotent: ยิงซ้ำสร้างซ้ำ</td></tr>
+    <tr><td><code>PUT</code></td><td>แก้ไขข้อมูลที่มีอยู่ (มี body)</td><td><code>/subjects/{id}</code></td><td>Idempotent: ยิงซ้ำผลเท่าเดิม</td></tr>
+    <tr><td><code>DELETE</code></td><td>ลบ resource</td><td><code>/subjects/{id}</code></td><td>Idempotent</td></tr>
+  </table></div>
+  <div class="note extra"><b class="tag">เสริม</b>
+    <p><b>PATCH</b> แก้เฉพาะบาง field ส่วน PUT แทนที่ทั้ง resource · <b>Safe</b> คือไม่เปลี่ยนสถานะบน server · <b>Idempotent</b> คือเรียกกี่ครั้งผลสุดท้ายก็เท่ากับเรียกครั้งเดียว</p></div>
+
+  <h3>1.3 HTTP Status Code</h3>
+  <p>Status code บอกผลลัพธ์ตั้งแต่บรรทัดแรกของ Response แบ่งตามเลขหลักแรก</p>
+  <div class="tbl"><table>
+    <tr><th>กลุ่ม</th><th>ความหมาย</th><th>รหัสที่ต้องรู้</th></tr>
+    <tr><td><span class="pill s2">2xx</span></td><td>สำเร็จ</td><td><code>200</code> OK · <code>201</code> Created · <code>204</code> No Content</td></tr>
+    <tr><td><span class="pill">3xx</span></td><td>Redirect</td><td><code>301</code> Moved · <code>304</code> Not Modified</td></tr>
+    <tr><td><span class="pill s4">4xx</span></td><td>ความผิดพลาดฝั่ง client</td><td><code>400</code> <code>401</code> <code>403</code> <code>404</code> <code>409</code> <code>412</code></td></tr>
+    <tr><td><span class="pill s5">5xx</span></td><td>ความผิดพลาดฝั่ง server</td><td><code>500</code> Internal Server Error · <code>503</code> Service Unavailable</td></tr>
+  </table></div>
+  <p>รายละเอียดของรหัส 4xx/5xx ดูในบท Error Handling</p>
+
+  <h3>1.4 สถาปัตยกรรมเว็บ: MPA vs SPA</h3>
+  <div class="two">
+    <div class="panel"><h4>MPA (Multi-Page Application)</h4>
+      <p>ทุกหน้าโหลดจาก server แล้ว refresh ทั้งหน้า server รวม Controller, Model และ <b>View Template Engine</b> สร้าง HTML ส่งกลับ</p>
+      <div class="flow"><div class="node">Browser</div><div class="arr">⇄</div><div class="node a">Server<small>Controller + Model + View</small></div><div class="arr">⇄</div><div class="node">DB</div></div></div>
+    <div class="panel"><h4>SPA (Single Page Application)</h4>
+      <p>โหลด HTML + CSS + JS ครั้งแรกครั้งเดียว หลังจากนั้นเรียก <b>RESTful API</b> ผ่าน AJAX/XMLHttpRequest แล้วรับ <b>JSON</b> มาอัปเดตหน้าเอง</p>
+      <div class="flow"><div class="node">Browser / Mobile<small>Front-End</small></div><div class="arr">{JSON}</div><div class="node a">REST API<small>Back-End</small></div><div class="arr">⇄</div><div class="node">DB</div></div></div>
+  </div>
+  <p>วิชานี้ทำ Back-End แบบ SPA คือ server ไม่สร้างหน้าเว็บ มีหน้าที่ให้ <b>ข้อมูล JSON</b> อย่างเดียว ทำให้ mobile app และเว็บใช้ API ชุดเดียวกันได้</p>
+
+  <h3>1.5 JSON</h3>
+  <p><b>JSON (JavaScript Object Notation)</b> เป็นรูปแบบข้อมูลน้ำหนักเบา คนอ่านง่าย เครื่อง parse ง่าย ใช้ข้อความล้วนและไม่ผูกกับภาษาโปรแกรม</p>
+<pre><code>{ "code": "INT 161", "credit": 3, "open": true, "tags": ["backend","rest"], "teacher": null }</code></pre>
+  <div class="note extra"><b class="tag">เสริม</b><p>ชนิดข้อมูลใน JSON มี 6 แบบ: string, number, boolean, null, array, object · key ต้องอยู่ใน double quote · <code>JSON.stringify()</code> แปลง object เป็นข้อความ · <code>JSON.parse()</code> แปลงกลับ</p></div>
+
+  <h3>1.6 Web Services: SOAP vs REST</h3>
+  <div class="tbl"><table>
+    <tr><th></th><th>SOAP</th><th>RESTful</th></tr>
+    <tr><td>ชนิด</td><td>โปรโตคอล (Simple Object Access Protocol)</td><td>แนวทางการออกแบบ ไม่ใช่โปรโตคอล</td></tr>
+    <tr><td>รูปแบบข้อมูล</td><td>XML เท่านั้น</td><td>JSON, XML, text ได้ (นิยม JSON)</td></tr>
+    <tr><td>คำอธิบาย service</td><td>WSDL</td><td>ใช้หลักการที่มีอยู่ใน HTTP</td></tr>
+    <tr><td>ผู้คิดค้น</td><td>-</td><td>Roy Fielding (ผู้ร่วมออกแบบ HTTP)</td></tr>
+  </table></div>
+</section>
+
+<!-- ============ NODE ============ -->
+<section id="node">
+  <div class="week">Intro · Week 2</div>
+  <h2>2. Node.js และ HTTP Module</h2>
+
+  <h3>2.1 Node.js คืออะไร</h3>
+  <p>Node.js <b>ไม่ใช่ภาษาโปรแกรม</b> แต่เป็น <b>runtime</b> ที่รัน JavaScript บนเซิร์ฟเวอร์ ฟรี open source ทำงานบน Windows, Mac, Linux ข้อดีหลักคือใช้ภาษาเดียว (JavaScript) ทั้ง front-end และ back-end</p>
+
+  <h3>2.2 Compile vs Interpret vs Hybrid</h3>
+  <figure>
+    <div class="two">
+      <div class="panel"><h4>Compiler</h4><p style="font-size:14px">แปลทั้งโปรแกรมเป็น machine code ก่อนรัน<br>เร็ว แต่ผูกกับ OS/CPU<br><span class="pill">C, C++, Go</span></p></div>
+      <div class="panel"><h4>Interpreter</h4><p style="font-size:14px">แปลทีละบรรทัดตอนรัน<br>พัฒนาและ debug เร็ว พกพาง่าย แต่ช้ากว่า<br><span class="pill">Python, JS รุ่นแรก</span></p></div>
+      <div class="panel"><h4>Hybrid</h4><p style="font-size:14px">Source → Byte code → VM (Interpreter + JIT) → machine code<br><span class="pill">Java, Kotlin, C#</span></p></div>
+    </div>
+    <figcaption>Node.js ใช้ engine V8 ที่ทำ JIT compile ซึ่งแปลง JavaScript เป็น machine code ขณะรัน</figcaption>
+  </figure>
+
+  <h3>2.3 Architecture: Single Thread + Event Loop</h3>
+  <p>Node.js รัน JavaScript ใน <b>thread เดียว</b> แต่รองรับ request จำนวนมากด้วยการทำงานแบบ <b>asynchronous / non-blocking</b> ผ่าน async/await</p>
+  <figure>
+    <div class="flow">
+      <div class="node">Clients<small>หลาย request</small></div><div class="arr">→</div>
+      <div class="node">Event Queue<small>เข้าคิว</small></div><div class="arr">→</div>
+      <div class="node a">Event Loop<small>หยิบทีละงาน</small></div><div class="arr">→</div>
+      <div class="node g">งานง่าย / non-blocking<small>ตอบ client ทันที</small></div>
+    </div>
+    <div class="flow" style="margin-top:8px"><div class="arr" style="flex:1;text-align:right">งานหนัก (I/O) →</div><div class="node w" style="flex:1 1 220px">ส่งให้ระบบ/thread pool ทำ แล้วกลับมาเข้าคิวเมื่อเสร็จ</div></div>
+    <figcaption>Event Loop ไม่รอ I/O เสร็จ มันไปทำ request อื่นต่อ จึงรับงานพร้อมกันได้มาก</figcaption>
+  </figure>
+  <div class="note extra"><b class="tag">เสริม</b><p><b>Blocking</b> คือฟังก์ชันที่หยุดรอจนเสร็จ เช่น <code>fs.readFileSync</code> ถ้าใช้ใน server จะทำให้ request อื่นค้างทั้งหมด ควรใช้ <code>await fs.readFile</code> แทน · Node.js เหมาะกับงาน I/O หนัก (API, chat) แต่ไม่เหมาะกับงานคำนวณหนักที่ใช้ CPU นาน</p></div>
+
+  <h3>2.4 Core Modules ที่ควรรู้</h3>
+  <div class="tbl"><table>
+    <tr><td><code>fs</code> ไฟล์</td><td><code>http</code> server/client</td><td><code>path</code> พาธไฟล์</td><td><code>os</code> ระบบปฏิบัติการ</td><td><code>events</code> event</td></tr>
+    <tr><td><code>util</code> ยูทิลิตี</td><td><code>stream</code> สตรีม</td><td><code>crypto</code> เข้ารหัส</td><td><code>url</code> parse URL</td><td><code>querystring</code> query</td></tr>
+  </table></div>
+
+  <h3>2.5 CommonJS vs ES Modules</h3>
+  <div class="tbl"><table>
+    <tr><th></th><th>CommonJS (CJS)</th><th>ES Modules (ESM)</th></tr>
+    <tr><td>Syntax</td><td><code>require()</code> / <code>module.exports</code></td><td><code>import</code> / <code>export</code></td></tr>
+    <tr><td>การโหลด</td><td>Synchronous ตอน runtime</td><td>Parse แบบ static รองรับ async</td></tr>
+    <tr><td>ใช้ได้ที่</td><td>Node.js (ดั้งเดิม)</td><td>Browser และ Node.js</td></tr>
+    <tr><td>Tree-shaking</td><td>ทำได้ไม่ดี</td><td>Bundler ตัดโค้ดที่ไม่ใช้ได้</td></tr>
+    <tr><td>ตัวแปรพิเศษ</td><td><code>__dirname</code>, <code>__filename</code></td><td><code>import.meta.url</code></td></tr>
+  </table></div>
+  <p><b>แนะนำ:</b> โปรเจกต์ใหม่ใช้ ESM เสมอ (เพิ่ม <code>"type": "module"</code> ใน package.json) ใช้ CJS เฉพาะ legacy code</p>
+
+  <h3>2.6 HTTP Module: 4 คลาสหลัก</h3>
+  <div class="tbl"><table>
+    <tr><th>คลาส</th><th>บทบาท</th><th>สมาชิกสำคัญ</th></tr>
+    <tr><td><code>http.Server</code></td><td>ตัว server</td><td><code>listen(port)</code>, <code>close()</code>, event <code>'request'</code></td></tr>
+    <tr><td><code>http.IncomingMessage</code></td><td>ข้อมูล request ที่เข้ามา (เป็น ReadableStream)</td><td><code>method</code>, <code>url</code>, <code>headers</code></td></tr>
+    <tr><td><code>http.ServerResponse</code></td><td>สร้างและส่ง response</td><td><code>writeHead()</code>, <code>setHeader()</code>, <code>write()</code>, <code>end()</code></td></tr>
+    <tr><td><code>http.ClientRequest</code></td><td>request ที่เรายิงออกไปหา server อื่น</td><td><code>write()</code>, <code>end()</code>, event <code>'response'</code></td></tr>
+  </table></div>
+<pre><code><span class="k">import</span> * <span class="k">as</span> http <span class="k">from</span> <span class="s">'node:http'</span>;
+<span class="k">const</span> listener = (request, response) =&gt; {
+  <span class="k">const</span> { url, method } = request;
+  response.writeHead(<span class="s">200</span>, { <span class="s">'Content-Type'</span>: <span class="s">'text/plain'</span> });
+  response.end(<span class="s">`You made a ${method} request to ${url}`</span>);
+};
+http.createServer(listener).listen(3000);</code></pre>
+
+  <h3>2.7 อ่านข้อมูลจาก Request</h3>
+  <figure>
+    <div class="flow"><div class="node">http://localhost:3000</div><div class="node a"><code>/user/123</code><small>pathname → path segment</small></div><div class="node w"><code>?name=Somchai&amp;fav=Web</code><small>query string → searchParams</small></div></div>
+    <figcaption>ส่วนประกอบของ URL ที่ backend ต้องอ่าน</figcaption>
+  </figure>
+<pre><code><span class="k">const</span> urlObj = <span class="k">new</span> URL(request.url, <span class="s">`http://${request.headers.host}`</span>);
+urlObj.searchParams.get(<span class="s">'name'</span>);       <span class="c">// ค่าเดียว</span>
+urlObj.searchParams.getAll(<span class="s">'fav_subj'</span>);  <span class="c">// หลายค่า → array</span>
+urlObj.pathname.split(<span class="s">'/'</span>).filter(Boolean); <span class="c">// "/users/123" → ["users","123"]</span></code></pre>
+  <p><code>split('/')</code> ของ <code>/users/123</code> ได้ <code>["", "users", "123"]</code> ตัว <code>filter(Boolean)</code> ตัด string ว่างทิ้ง ส่วน <b>body</b> ต้องรับเองเป็น stream แล้วค่อย <code>JSON.parse</code></p>
+  <div class="note"><b class="tag">จากสไลด์ (Week 4)</b><p>การรับ body แบบไม่มี framework: ฟัง event <code>'data'</code> ต่อ chunk เข้าด้วยกัน พอ <code>'end'</code> จึง parse ซึ่งยุ่งยากมาก นี่คือเหตุผลที่ต้องมี Express (บท 4)</p></div>
+
+  <h3>2.8 Node.js vs Bun</h3>
+  <div class="note extra"><b class="tag">เสริม (สไลด์มีหัวข้อแต่ไม่ลงรายละเอียด)</b>
+    <p><b>Bun</b> คือ JavaScript runtime อีกตัว ใช้ engine JavaScriptCore (Node.js ใช้ V8) รวม runtime, package manager, bundler และ test runner ไว้ในตัว เร็วกว่าในหลายงาน และรัน TypeScript ได้โดยตรง ขณะที่ Node.js มี ecosystem และความเสถียรมากกว่า โค้ดส่วนใหญ่ใช้ร่วมกันได้เพราะรองรับ API <code>node:*</code></p></div>
+</section>
+
+<!-- ============ REST ============ -->
+<section id="rest">
+  <div class="week">Week 3</div>
+  <h2>3. RESTful API</h2>
+  <p><b>REST = REpresentational State Transfer</b> สร้างโดย Roy Fielding เป็น <b>สถาปัตยกรรม</b> สำหรับ web service ฝั่ง server ให้เข้าถึง <b>resource</b> ฝั่ง client เข้าถึงและแก้ไข resource แต่ละตัวมี <b>URI</b> เป็นตัวระบุ และถูกส่งในรูป <b>representation</b> เช่น JSON, XML, text</p>
+
+  <h3>3.1 หลักการและข้อจำกัด 6 ข้อ</h3>
+  <figure>
+    <div class="two">
+      <div class="panel"><h4>1. Client-Server</h4><p style="font-size:14px;margin:0">แยกหน้าที่ client กับ server server เป็นผู้ให้บริการ client ส่งคำขอ แล้ว server ปฏิเสธหรือตอบรับ</p></div>
+      <div class="panel"><h4>2. Stateless</h4><p style="font-size:14px;margin:0">ทุก request ต้องมี <b>ข้อมูลครบในตัวเอง</b> server ไม่จำ context ของ request ก่อนหน้า client เก็บ session state เอง</p></div>
+      <div class="panel"><h4>3. Uniform Interface</h4><p style="font-size:14px;margin:0">ใช้ HTTP verbs มาตรฐาน (POST/GET/PUT/DELETE) จัดการ resource</p></div>
+      <div class="panel"><h4>4. Layered System</h4><p style="font-size:14px;margin:0">แบ่งเป็นชั้น แต่ละชั้นเห็นเฉพาะชั้นที่ติดกัน client ไม่รู้ว่าคุยกับ server จริงหรือตัวกลาง</p></div>
+      <div class="panel"><h4>5. Cacheable</h4><p style="font-size:14px;margin:0">Response ต้องบอกว่า cache ได้หรือไม่ ถ้าได้ client นำไปใช้ซ้ำได้ในช่วงเวลาที่กำหนด</p></div>
+      <div class="panel"><h4>6. Code on Demand <span class="pill">optional</span></h4><p style="font-size:14px;margin:0">server ส่งโค้ด (script/applet) ให้ client ไปรันเพื่อขยายความสามารถได้</p></div>
+    </div>
+    <figcaption>ข้อ 1-5 บังคับ ข้อ 6 เป็นทางเลือก</figcaption>
+  </figure>
+  <div class="note extra"><b class="tag">เสริม: ทำไม Stateless สำคัญ</b><p>เมื่อ server ไม่เก็บ state เราเพิ่มจำนวน server แล้วให้ load balancer กระจาย request ไปเครื่องไหนก็ได้ ระบบ scale ง่าย นี่คือเหตุผลที่ต้องมี JWT ในบทหลังๆ เพื่อให้ client แนบ identity มากับทุก request</p></div>
+
+  <h3>3.2 Uniform Interface: 4 เสาหลัก</h3>
+  <div class="tbl"><table>
+    <tr><th>เสา</th><th>ความหมาย</th></tr>
+    <tr><td>Resource Identification</td><td>URI ระบุ <b>resource</b> ไม่ใช่การกระทำ เช่น <code>/api/v1/users</code></td></tr>
+    <tr><td>Manipulation via Representations</td><td>แลกเปลี่ยนสถานะด้วยรูปแบบมาตรฐาน (JSON)</td></tr>
+    <tr><td>Self-Descriptive Messages</td><td>ใช้ HTTP method และ header มาตรฐาน เช่น <code>Content-Type: application/json</code></td></tr>
+    <tr><td>HATEOAS</td><td>Response แนบ hypermedia link นำทาง client ไปยัง action ถัดไป</td></tr>
+  </table></div>
+
+  <h3>3.3 กฎการตั้งชื่อ Endpoint</h3>
+  <div class="two">
+    <div class="panel"><h4 style="color:var(--good)">ควรทำ</h4><ul>
+      <li>ใช้ <b>คำนามพหูพจน์</b> (<code>/products</code>)</li>
+      <li>ให้ HTTP verb บอกการกระทำ</li>
+      <li>ลำดับชั้นด้วย sub-collection</li>
+      <li>ส่ง status code ให้ถูกต้อง</li></ul></div>
+    <div class="panel"><h4 style="color:var(--bad)">ไม่ควรทำ</h4><ul>
+      <li><code>/getAllProducts</code></li><li><code>/createUser</code></li><li><code>/deleteProduct?id=1</code></li>
+      <li>ใช้ <code>GET</code> เพื่อลบหรือแก้ข้อมูล</li></ul></div>
+  </div>
+  <div class="tbl"><table>
+    <tr><th>URI</th><th>Verb</th><th>ความหมาย</th></tr>
+    <tr><td><code>/api/products</code></td><td>GET</td><td>ดึงสินค้าทั้งหมด (collection)</td></tr>
+    <tr><td><code>/api/products/1</code></td><td>GET</td><td>ดึงสินค้า id = 1 (singleton)</td></tr>
+    <tr><td><code>/api/products/1/orders</code></td><td>GET</td><td>ดึง order ทั้งหมดของสินค้า 1 (sub-collection)</td></tr>
+    <tr><td><code>/api/products</code></td><td>POST</td><td>เพิ่มสินค้าใหม่</td></tr>
+    <tr><td><code>/api/products/1</code></td><td>PUT</td><td>แก้ไขสินค้า 1</td></tr>
+    <tr><td><code>/api/products/1</code></td><td>DELETE</td><td>ลบสินค้า 1</td></tr>
+  </table></div>
+
+  <h3>3.4 Layered System</h3>
+  <figure>
+    <div class="stack">
+      <div class="node a">Front-End / Client</div><div class="arr">↕ JSON</div>
+      <div class="node">HTTP / Routing Layer<small>Presentation · รับ-ส่ง HTTP</small></div><div class="arr">↕ Entity Object</div>
+      <div class="node">Service Layer<small>Business Logic</small></div><div class="arr">↕ Entity Object</div>
+      <div class="node">Data Access Layer<small>Repository · Persistence</small></div><div class="arr">↕ SQL</div>
+      <div class="node g">Database</div>
+    </div>
+    <figcaption>แต่ละชั้นคุยกับชั้นที่ติดกันเท่านั้น ห้ามข้ามชั้น</figcaption>
+  </figure>
+  <p><b>ประโยชน์:</b> (1) <b>Scalability</b> เพิ่ม shared cache หรือ load balancer โดย client ไม่ต้องแก้ (2) <b>Separation of Concerns</b> แยกการ parse HTTP ออกจาก business logic และ DB (3) <b>Security</b></p>
+  <p>โครงสร้างโปรเจกต์แบบไม่ใช้ framework: <code>server.js</code> (เปิด server) · <code>router.js</code> (จับคู่ route) · <code>services/</code> (business logic) · <code>repositories/</code> (เข้าถึงข้อมูล)</p>
+</section>
+
+<!-- ============ EXPRESS ============ -->
+<section id="express">
+  <div class="week">Week 4 · Express.js</div>
+  <h2>4. Express Framework</h2>
+  <p>Express เป็น web framework ของ Node.js ที่ <b>minimalist, unopinionated, fast</b> ให้ชั้น <b>routing</b> และ <b>middleware</b> ครอบ HTTP server ของ Node.js ใช้เป็นส่วน Back-end ของ MEAN/MERN stack (MongoDB, <b>E</b>xpress, Angular/React, Node.js) <b>Unopinionated</b> หมายถึงเราจัดโครงสร้างแอปเองได้อิสระ</p>
+
+  <h3>4.1 Raw Node.js vs Express</h3>
+  <figure>
+    <div class="two">
+      <div class="panel"><h4>Raw http</h4><ul><li>อ่าน body ต่อ chunk เอง</li><li>parse URL และ query เอง</li><li><code>res.writeHead</code> + <code>res.end</code></li></ul></div>
+      <div class="panel"><h4 style="color:var(--accent)">Express</h4><ul><li>Body parser อัตโนมัติ (<code>express.json()</code>)</li><li>Route จับคู่ด้วย pattern</li><li><code>res.json()</code> / <code>res.send()</code></li></ul></div>
+    </div>
+  </figure>
+<pre><code><span class="k">import</span> express <span class="k">from</span> <span class="s">'express'</span>;
+<span class="k">const</span> app = express();
+app.use(express.json());                      <span class="c">// middleware อ่าน JSON body</span>
+app.put(<span class="s">'/api/subjects/:id'</span>, (req, res) =&gt; {
+  <span class="k">const</span> { filter, page, size } = req.query;   <span class="c">// ?page=2</span>
+  <span class="k">const</span> id = req.params.id;                    <span class="c">// :id</span>
+  <span class="k">const</span> subject = req.body;                    <span class="c">// body</span>
+  res.json({ ...subject, id });
+});
+app.listen(3000);</code></pre>
+  <p>ติดตั้งด้วย <code>npm install express</code> (ระบุเวอร์ชันได้ด้วย <code>@version</code>)</p>
+
+  <h3>4.2 Request และ Response</h3>
+  <div class="tbl"><table>
+    <tr><th>ตัวช่วย</th><th>ดึงอะไร</th><th>ตัวอย่าง URL</th></tr>
+    <tr><td><code>req.params</code></td><td>ตัวแปรใน path</td><td><code>/subjects/<b>5</b></code> → <code>params.id = "5"</code></td></tr>
+    <tr><td><code>req.query</code></td><td>query string</td><td><code>/subjects?<b>page=2&amp;limit=10</b></code></td></tr>
+    <tr><td><code>req.body</code></td><td>body ที่ parse แล้ว (ต้องมี middleware)</td><td>JSON ที่ client ส่งมา</td></tr>
+  </table></div>
+  <div class="note"><b class="tag">จุดที่มักออกสอบ</b><p><code>res.status(201)</code> <b>ไม่ได้ส่ง response</b> มันคืน object <code>res</code> กลับมาเพื่อต่อ chain กับ <code>.json()</code> / <code>.send()</code> เช่น <code>res.status(201).json(subject)</code> ส่วน <code>res.json()</code> เดี่ยวๆ ใช้ status 200</p></div>
+
+  <h3>4.3 Routing</h3>
+  <p>Routing คือการกำหนดว่าแอปตอบ request อย่างไร ตาม <b>URL + HTTP method</b></p>
+<pre><code>router.<span class="k">METHOD</span>(PATH, HANDLER);
+router.get(<span class="s">'/api/user/:id'</span>, (req, res) =&gt; { ... });</code></pre>
+  <p>Path เป็น string หรือ regex ได้ และมี parameter (<code>:id</code>) ได้ ใช้ <code>express.Router()</code> แยก route เป็นไฟล์ แล้วผูกกับแอปด้วย <code>app.use('/products', productRouter)</code></p>
+
+  <h3>4.4 Middleware</h3>
+  <p>Middleware คือฟังก์ชันที่รับ <code>(req, res, next)</code> ทำงานคั่นกลางก่อนถึง route เช่น log, parse body, authentication, validation, CORS ถ้าเรียก <code>next()</code> จะส่งต่อให้ตัวถัดไป ถ้าเรียก <code>res.send()</code>/<code>res.json()</code> จะจบ response ทันที</p>
+  <figure>
+    <div class="flow">
+      <div class="node">Request</div><div class="arr">→</div>
+      <div class="node a">Logger<small>next()</small></div><div class="arr">→</div>
+      <div class="node a">express.json()<small>next()</small></div><div class="arr">→</div>
+      <div class="node a">Auth / Validate<small>next()</small></div><div class="arr">→</div>
+      <div class="node g">Router handler<small>res.json()</small></div><div class="arr">→</div>
+      <div class="node">Response</div>
+    </div>
+    <figcaption>ลำดับการทำงานเรียงตามที่ <code>app.use()</code> ถูกประกาศ ลำดับสำคัญมาก</figcaption>
+  </figure>
+  <p><b>5 ประเภท:</b> Application-level · Router-level · Error-handling · Built-in (<code>express.json</code>) · Third-party (เช่น cors)</p>
+
+  <h3>4.5 ระบบสามชั้น: Controller / Service / Repository</h3>
+  <figure>
+    <div class="stack">
+      <div class="node a"><b>Controller (Router)</b><small>รับ request · แปลงเป็น object · ส่ง response (status + JSON) · ห้ามมี business logic</small></div><div class="arr">↓ ↑</div>
+      <div class="node w"><b>Service</b><small>กฎธุรกิจ · validation · คำนวณ · ประสานหลาย repository / external API</small></div><div class="arr">↓ ↑</div>
+      <div class="node g"><b>Repository</b><small>เข้าถึงข้อมูล CRUD · query · ห้ามมี business logic</small></div>
+    </div>
+    <figcaption>เปรียบเทียบกับโรงพยาบาล: Controller = เคาน์เตอร์ต้อนรับ · Service = หมอ · Repository = ห้องเก็บเวชระเบียน</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <tr><th>ชั้น</th><th>หน้าที่</th><th>ควรมี</th><th>ไม่ควรมี</th></tr>
+    <tr><td>Controller</td><td>จัดการ HTTP req/res</td><td>Routing, mapping, validation</td><td>Business logic, DB code</td></tr>
+    <tr><td>Service</td><td>กฎธุรกิจและประสานงาน</td><td>Business logic, calculation</td><td>รายละเอียด HTTP หรือ DB</td></tr>
+    <tr><td>Repository</td><td>เข้าถึงข้อมูล (CRUD)</td><td>Query, persistence</td><td>Business logic, HTTP</td></tr>
+  </table></div>
+  <p>Template โปรเจกต์ที่ใช้ในคลาส: <code>src/</code> → <code>configs/</code> · <code>repositories/</code> · <code>services/</code> · <code>routes/</code> พร้อม <code>"type": "module"</code> และ <code>"main": "src/app.js"</code></p>
+  <div class="note extra"><b class="tag">เสริม: ทำไมต้องแยกชั้น</b><p>ถ้าวันหนึ่งเปลี่ยนจาก MySQL เป็น Prisma เราแก้เฉพาะ Repository ถ้าเปลี่ยนจาก REST เป็น GraphQL เราแก้เฉพาะ Controller ส่วน Service ไม่ต้องแตะ การทดสอบ Service ก็ทำได้โดยไม่ต้องเปิด server หรือ DB</p></div>
+</section>
+
+<!-- ============ DB ============ -->
+<section id="db">
+  <div class="week">Week 5</div>
+  <h2>5. เชื่อมต่อ Database ด้วย mysql2</h2>
+
+  <h3>5.1 ขั้นตอนเชื่อมต่อ</h3>
+  <figure>
+    <div class="flow">
+      <div class="node a">1. ติดตั้ง driver<small><code>npm i mysql2</code></small></div><div class="arr">→</div>
+      <div class="node a">2. สร้าง Pool<small><code>createPool({...})</code></small></div><div class="arr">→</div>
+      <div class="node a">3. ส่ง SQL<small><code>await pool.query()</code></small></div>
+    </div>
+  </figure>
+<pre><code><span class="k">import</span> * <span class="k">as</span> mysql <span class="k">from</span> <span class="s">'mysql2/promise'</span>;
+<span class="k">export const</span> pool = mysql.createPool({ host:<span class="s">'localhost'</span>, user:<span class="s">'root'</span>, password:<span class="s">'***'</span>, database:<span class="s">'sampledb'</span> });
+
+<span class="k">const</span> [rows, fields] = <span class="k">await</span> pool.query(<span class="s">'SELECT * FROM subjects WHERE credit = ?'</span>, [3]);</code></pre>
+  <p><b>ผลลัพธ์ของ query</b> เป็น array <code>[rows, fields]</code> ใช้ destructuring ดึง rows ออกมา สำหรับ INSERT/UPDATE/DELETE ค่าแรกเป็น object ที่มี <code>affectedRows</code> และ <code>insertId</code></p>
+
+  <h3>5.2 Connection vs Pool</h3>
+  <div class="two">
+    <div class="panel"><h4>Connection</h4><p style="font-size:14px;margin:0">การเชื่อมต่อ 1 ช่องทางไปยัง DBMS สร้างและปิดทุกครั้งที่ใช้ ช้าและสิ้นเปลือง</p></div>
+    <div class="panel"><h4>Pool</h4><p style="font-size:14px;margin:0">ตัวจัดการกลุ่ม connection ที่เปิดไว้แล้ว ยืมใช้แล้วคืน เหมาะกับ server ที่มี request จำนวนมาก</p></div>
+  </div>
+  <p>Library รองรับ 2 แบบ: <b>Callback API</b> (<code>(err, results, fields) =&gt; {}</code>) และ <b>Promise API</b> (<code>async/await</code>) ซึ่งอ่านง่ายกว่าและเป็นแบบที่ใช้ในวิชา เมื่อจบสคริปต์ทดสอบให้เรียก <code>await pool.end()</code></p>
+
+  <h3>5.3 Prepared Statement และ SQL Injection</h3>
+  <p>ใช้ <code>?</code> เป็นตัวแทนค่า แล้วส่งค่าจริงเป็น array แยกต่างหาก driver จะ escape ค่าให้ปลอดภัย ป้องกัน <b>SQL Injection</b></p>
+  <figure>
+    <div class="two">
+      <div class="panel" style="border-color:var(--bad)"><h4 style="color:var(--bad)">ไม่ปลอดภัย: ต่อ string</h4>
+<pre><code><span class="k">const</span> sql = <span class="s">`SELECT * FROM users
+ WHERE id = ${id}`</span>;
+<span class="c">// id = "1 OR 1=1"
+// → SELECT * ... WHERE id = 1 OR 1=1
+// ได้ข้อมูลผู้ใช้ทั้งหมด</span></code></pre></div>
+      <div class="panel" style="border-color:var(--good)"><h4 style="color:var(--good)">ปลอดภัย: Prepared statement</h4>
+<pre><code>pool.query(
+ <span class="s">'SELECT * FROM users WHERE id = ?'</span>,
+ [id]);
+<span class="c">// "1 OR 1=1" ถูกมองเป็นค่าตัวเดียว
+// ไม่ถูกตีความเป็นคำสั่ง SQL</span></code></pre></div>
+    </div>
+    <figcaption>ข้อมูลจาก user ต้องไม่ถูกต่อเป็นส่วนหนึ่งของคำสั่ง SQL เด็ดขาด</figcaption>
+  </figure>
+  <div class="note extra"><b class="tag">เสริม</b><p>SQL Injection อยู่ใน OWASP Top 10 มาตลอด ผู้โจมตีใส่ SQL เข้าไปใน input เพื่ออ่าน แก้ หรือลบข้อมูล ชื่อตารางและชื่อคอลัมน์ใส่ <code>?</code> ไม่ได้ ถ้าต้องรับจาก user ให้เทียบกับ whitelist ก่อน</p></div>
+
+  <h3>5.4 CRUD ใน Repository</h3>
+  <div class="tbl"><table>
+    <tr><th>Operation</th><th>HTTP</th><th>SQL</th><th>สิ่งที่ตรวจ</th></tr>
+    <tr><td>Create</td><td>POST</td><td><code>INSERT INTO ... VALUES (?,?,?)</code></td><td><code>affectedRows</code>, ใช้ <code>insertId</code> ดึงแถวใหม่</td></tr>
+    <tr><td>Read</td><td>GET</td><td><code>SELECT ... [WHERE id = ?]</code></td><td>ไม่พบ → <code>null</code> / 404</td></tr>
+    <tr><td>Update</td><td>PUT</td><td><code>UPDATE ... SET ... WHERE id = ?</code></td><td><code>affectedRows === 0</code> → ไม่พบ</td></tr>
+    <tr><td>Delete</td><td>DELETE</td><td><code>DELETE FROM ... WHERE id = ?</code></td><td><code>affectedRows &gt; 0</code> → ลบสำเร็จ</td></tr>
+  </table></div>
+  <div class="tbl"><table>
+    <tr><th>สถานการณ์</th><th>Status ที่ควรตอบ</th></tr>
+    <tr><td>สร้างสำเร็จ</td><td><span class="pill s2">201 Created</span></td></tr>
+    <tr><td>body ว่างหรือข้อมูลไม่ครบ</td><td><span class="pill s4">400 Bad Request</span></td></tr>
+    <tr><td>ไม่พบ id ที่ขอ</td><td><span class="pill s4">404 Not Found</span></td></tr>
+    <tr><td>รหัสซ้ำ (ติด unique)</td><td><span class="pill s4">409 Conflict</span></td></tr>
+  </table></div>
+</section>
+
+<!-- ============ ERROR ============ -->
+<section id="error">
+  <div class="week">Week 8 · Exception Handling</div>
+  <h2>6. Error / Exception Handling</h2>
+
+  <h3>6.1 Error คืออะไรและทำไมสำคัญ</h3>
+  <p><b>Exception/Error</b> คือเหตุการณ์ที่ขัดจังหวะการทำงานปกติของโปรแกรม ถ้า throw แล้วไม่มีใคร catch Node.js จะ <b>terminate process</b> ทำให้ server ล่มทั้งตัว Error เป็น <b>object</b> ที่ห่อสภาวะผิดปกติไว้</p>
+  <div class="two">
+    <div class="panel"><h4>ทำไมต้องจัดการ</h4><ul><li>กัน app crash / downtime</li><li>ข้อความที่ผู้ใช้เข้าใจ</li><li>ไม่รั่ว stack trace หรือข้อมูลลับ</li><li>ช่วย debug, monitor, alert</li></ul></div>
+    <div class="panel"><h4>ชนิดของ Error</h4><ul>
+      <li><b>Programming Error</b>: bug, logic ผิด (TypeError)</li>
+      <li><b>Operational Error</b>: network timeout, DB down, ไม่พบไฟล์</li>
+      <li><b>Expected vs Unexpected</b>: expected ต้องจัดการอย่างสุภาพ</li></ul></div>
+  </div>
+
+  <h3>6.2 Error Propagation</h3>
+  <p>เมื่อเกิด error ในฟังก์ชัน จะถูก catch ตรงนั้น หรือ <b>ส่งต่อขึ้นไปตาม call stack</b> จนมีคน catch ถ้าไม่มีเลยก็ขึ้นไปถึง global scope แล้วโปรแกรมจบ</p>
+  <figure>
+    <div class="stack">
+      <div class="node">main()<small>try … catch อยู่ที่นี่ ✔ จับได้</small></div><div class="arr">↑ propagate</div>
+      <div class="node">a()<small>ไม่ได้ catch</small></div><div class="arr">↑ propagate</div>
+      <div class="node r">b()<small>throw Error (เช่น readFileSync ไม่พบไฟล์)</small></div>
+    </div>
+    <figcaption>Error ลอยขึ้นทีละชั้นจนเจอ catch ใน Express ชั้นที่จับรวมคือ error-handling middleware</figcaption>
+  </figure>
+
+  <h3>6.3 JavaScript Error Object และ Custom Error</h3>
+  <div class="tbl"><table>
+    <tr><th>Property</th><th>ความหมาย</th></tr>
+    <tr><td><code>message</code></td><td>คำอธิบายที่คนอ่านได้</td></tr>
+    <tr><td><code>name</code></td><td>ชื่อชนิด เช่น <code>"TypeError"</code></td></tr>
+    <tr><td><code>stack</code></td><td>stack trace (ไม่ใช่มาตรฐานแต่ใช้ได้ทั่วไป)</td></tr>
+    <tr><td><code>code</code> / <code>errno</code></td><td>รหัส system error ของ Node เช่น <code>"EACCES"</code>, <code>"ENOENT"</code></td></tr>
+  </table></div>
+<pre><code><span class="k">class</span> AppError <span class="k">extends</span> Error {
+  <span class="k">constructor</span>(message, statusCode) {
+    <span class="k">super</span>(message);
+    <span class="k">this</span>.statusCode = statusCode;
+    <span class="k">this</span>.isOperational = <span class="k">true</span>;           <span class="c">// error ที่เราคาดไว้</span>
+    Error.captureStackTrace(<span class="k">this</span>, <span class="k">this</span>.constructor);
+  }
+}
+<span class="k">throw new</span> AppError(<span class="s">'Subject not found'</span>, 404);</code></pre>
+  <p>Custom error class ช่วยจัดหมวดและแนบ context (เช่น status code) เพื่อให้ตอบ client และบันทึก log ได้ตรงประเด็น</p>
+
+  <h3>6.4 Error Handling ใน Express</h3>
+  <p>เมื่อเรียก <code>next(err)</code> Express จะ <b>ข้าม middleware/route ปกติทั้งหมด</b> และกระโดดไปหา <b>error-handling middleware</b></p>
+  <figure>
+    <div class="flow">
+      <div class="node">Request</div><div class="arr">→</div>
+      <div class="node a">Middleware / Route</div><div class="arr">→</div>
+      <div class="node r">throw / next(err)</div><div class="arr">⤏</div>
+      <div class="node w">Error Handler<small>(err, req, res, next)</small></div><div class="arr">→</div>
+      <div class="node">JSON error response</div>
+    </div>
+    <figcaption>ชั้นที่ throw อยู่ลึกแค่ไหน ก็ถูกส่งมาจบที่ตัวจัดการรวมศูนย์ตัวเดียว (Global Error Handling)</figcaption>
+  </figure>
+<pre><code><span class="c">// ต้องประกาศ "หลังสุด" หลัง routes และ middleware ทั้งหมด</span>
+app.use((err, req, res, next) =&gt; {
+  <span class="k">const</span> status = err.status || err.statusCode || 500;
+  res.status(status).json({
+    error: err.code,
+    statusCode: status,
+    message: err.message,
+    path: req.originalUrl,
+    timestamp: <span class="k">new</span> Date().toLocaleString()
+  });
+});</code></pre>
+  <div class="note"><b class="tag">จุดที่มักออกสอบ</b><p>Error-handling middleware มี <b>4 พารามิเตอร์</b> <code>(err, req, res, next)</code> ส่วน middleware ปกติมี 3 · ถ้าไม่ได้เขียน handler Express จะส่งหน้า HTML error เริ่มต้น (มี stack trace เมื่ออยู่ใน dev mode)</p></div>
+  <div class="note extra"><b class="tag">เสริม: async handler</b><p>ใน Express 4 ถ้า <code>async</code> route ถูก reject ต้อง <code>try/catch</code> แล้ว <code>next(err)</code> เอง (หรือใช้ wrapper) ไม่งั้น error จะไม่ไปถึง handler · Express 5 จับ rejected promise ให้อัตโนมัติ · ใน production ไม่ควรส่ง <code>err.stack</code> ให้ client ส่วน error ที่ไม่คาดคิดให้ตอบ 500 ข้อความทั่วไปแล้วเก็บรายละเอียดไว้ใน log</p></div>
+
+  <h3>6.5 HTTP Status Code ฝั่ง Error</h3>
+  <div class="tbl"><table>
+    <tr><th>Code</th><th>ชื่อ</th><th>ใช้เมื่อ</th></tr>
+    <tr><td><span class="pill s4">400</span></td><td>Bad Request</td><td>request ไม่ถูกต้อง เช่น ไม่มี body หรือ parameter ที่จำเป็น</td></tr>
+    <tr><td><span class="pill s4">401</span></td><td>Unauthorized</td><td>client <b>ยังไม่ยืนยันตัวตน</b> (authenticate ไม่ผ่าน)</td></tr>
+    <tr><td><span class="pill s4">403</span></td><td>Forbidden</td><td>ยืนยันตัวตนแล้ว แต่ <b>ไม่มีสิทธิ์</b>เข้าถึง resource นี้</td></tr>
+    <tr><td><span class="pill s4">404</span></td><td>Not Found</td><td>ไม่มี resource ที่ขอ</td></tr>
+    <tr><td><span class="pill s4">409</span></td><td>Conflict</td><td>ขัดแย้งกับสถานะปัจจุบัน เช่น ข้อมูลซ้ำ</td></tr>
+    <tr><td><span class="pill s4">412</span></td><td>Precondition Failed</td><td>เงื่อนไขใน header ของ request เป็นเท็จ</td></tr>
+    <tr><td><span class="pill s5">500</span></td><td>Internal Server Error</td><td>เกิดข้อผิดพลาดทั่วไปฝั่ง server</td></tr>
+    <tr><td><span class="pill s5">503</span></td><td>Service Unavailable</td><td>บริการนั้นยังใช้ไม่ได้</td></tr>
+  </table></div>
+  <div class="note extra"><b class="tag">เสริม: จำ 401 กับ 403</b><p>401 = "คุณคือใคร ฉันยังไม่รู้" (ชื่อจริงๆ คือ unauthenticated) · 403 = "ฉันรู้ว่าคุณคือใคร แต่คุณไม่มีสิทธิ์" ข้อนี้ออกสอบบ่อยและเชื่อมกับบท Authentication/Authorization</p></div>
+</section>
+
+<!-- ============ PAGINATION ============ -->
+<section id="page">
+  <div class="week">Week 9-10</div>
+  <h2>7. Pagination และ DTO</h2>
+
+  <h3>7.1 ทำไมต้อง Pagination</h3>
+  <p>การส่ง record ทั้งหมดกลับไปทำให้ response ใหญ่ เพิ่มงานของ DB หน่วยความจำ และ network Pagination ทำให้ client ได้ response ขนาดที่คาดเดาได้</p>
+
+  <h3>7.2 พารามิเตอร์และสูตร Offset</h3>
+  <p>ตัวอย่าง <code>GET /api/products?page=2&amp;limit=20</code> โดย <code>page</code> = หน้าที่ขอ · <code>limit</code> = จำนวน record ต่อหน้า · <code>offset</code> = จำนวน record ที่ต้องข้าม (คำนวณเอง)</p>
+  <div class="note"><b class="tag">สูตร</b><p style="font-family:var(--f-mono)">OFFSET = (page − 1) × limit</p></div>
+  <div class="tbl"><table>
+    <tr><th class="num">page</th><th class="num">limit</th><th class="num">offset</th><th>record ที่ได้</th></tr>
+    <tr><td class="num">1</td><td class="num">10</td><td class="num">0</td><td>1-10</td></tr>
+    <tr><td class="num">2</td><td class="num">10</td><td class="num">10</td><td>11-20</td></tr>
+    <tr><td class="num">3</td><td class="num">10</td><td class="num">20</td><td>21-30</td></tr>
+    <tr><td class="num">9</td><td class="num">10</td><td class="num">80</td><td>81-90</td></tr>
+  </table></div>
+
+  <figure>
+    <b>ลองคำนวณ</b> (ข้อมูลตัวอย่าง 100 record)
+    <div class="ctl" style="margin-top:8px">
+      <label for="pg">page<input id="pg" type="number" value="3" min="1"></label>
+      <label for="lm">limit<input id="lm" type="number" value="10" min="1"></label>
+      <label for="tt">totalItems<input id="tt" type="number" value="100" min="0"></label>
+    </div>
+    <div class="pager" id="grid" aria-hidden="true"></div>
+    <output class="res" id="out" for="pg lm tt"></output>
+    <figcaption>ช่องที่ไฮไลต์คือ record ที่ SQL <code>LIMIT ? OFFSET ?</code> จะดึงมา</figcaption>
+  </figure>
+
+  <h3>7.3 Flow การทำงาน</h3>
+  <figure>
+    <div class="flow">
+      <div class="node">Client<small>?page&amp;limit</small></div><div class="arr">→</div>
+      <div class="node a">Middleware<small>validate + คำนวณ offset</small></div><div class="arr">→</div>
+      <div class="node w">MySQL<small>LIMIT / OFFSET + COUNT(*)</small></div><div class="arr">→</div>
+      <div class="node g">Response<small>items + pagination</small></div>
+    </div>
+  </figure>
+<pre><code><span class="k">SELECT</span> * <span class="k">FROM</span> products <span class="k">ORDER BY</span> productCode <span class="k">LIMIT</span> ? <span class="k">OFFSET</span> ?;   <span class="c">-- ข้อมูลหน้านั้น</span>
+<span class="k">SELECT</span> <span class="k">COUNT</span>(*) <span class="k">AS</span> total <span class="k">FROM</span> products;                       <span class="c">-- ใช้คำนวณ totalPages</span></code></pre>
+  <div class="note extra"><b class="tag">เสริม</b><p>ควรมี <code>ORDER BY</code> เสมอเมื่อ paginate ถ้าไม่เรียงลำดับ MySQL ไม่รับประกันว่าลำดับ record จะเหมือนเดิมทุกครั้ง หน้าถัดไปอาจได้ record ซ้ำหรือตกหล่น</p></div>
+
+  <h3>7.4 รูปแบบ JSON Response</h3>
+<pre><code>{
+  <span class="s">"success"</span>: true,
+  <span class="s">"data"</span>: [ ... ],
+  <span class="s">"pagination"</span>: {
+    <span class="s">"page"</span>: 2, <span class="s">"limit"</span>: 20, <span class="s">"totalItems"</span>: 138,
+    <span class="s">"totalPages"</span>: 7,        <span class="c">// Math.ceil(138 / 20)</span>
+    <span class="s">"hasNextPage"</span>: true,   <span class="c">// page * limit &lt; totalItems</span>
+    <span class="s">"hasPreviousPage"</span>: true <span class="c">// page &gt; 1</span>
+  }
+}</code></pre>
+
+  <h3>7.5 Best Practice</h3>
+  <div class="two">
+    <div class="panel"><ul>
+      <li>ตรวจว่า <code>page ≥ 1</code>: <code>Math.max(parseInt(page), 1)</code></li>
+      <li>กำหนด <b>limit สูงสุด</b> เช่น 100: <code>Math.min(parseInt(size), 100)</code></li>
+      <li>ใช้ <b>prepared statement</b></li></ul></div>
+    <div class="panel"><ul>
+      <li>สร้าง <b>index</b> ให้คอลัมน์ที่ filter และ sort</li>
+      <li>หน้าลึกมากๆ ให้พิจารณา <b>cursor pagination</b></li></ul></div>
+  </div>
+  <div class="note extra"><b class="tag">เสริม: OFFSET vs Cursor</b><p>OFFSET ลึกๆ ช้า เพราะ DB ต้องอ่านแล้วทิ้ง record ก่อนหน้าทั้งหมด (OFFSET 100000 = อ่าน 100000 แถวทิ้ง) Cursor pagination ใช้ <code>WHERE id &gt; :lastId ORDER BY id LIMIT n</code> ใช้ index ได้ตรงๆ จึงเร็วคงที่ แต่กระโดดไปหน้าที่ N ไม่ได้</p></div>
+  <div class="note bad"><b class="tag">จุดที่ต้องระวังในโค้ดสไลด์</b><p>Middleware ในสไลด์คำนวณ <code>offset = (page - 1) * pageSize</code> โดยใช้ <code>pageSize</code> ที่ยังเป็น string และยังไม่ถูกจำกัดที่ 100 แทนที่จะใช้ <code>limit</code> ที่ผ่าน <code>Math.min</code> แล้ว ถ้าส่ง <code>limit=500</code> จะได้ offset ผิด ควรใช้ <code>(page - 1) * limit</code></p></div>
+
+  <h3>7.6 DTO: Data Transfer Object</h3>
+  <p><b>DTO</b> คือ object ที่กำหนด <b>รูปร่างข้อมูลที่แลกเปลี่ยนระหว่างชั้น/ระหว่าง API กับ client</b> แยก "สัญญา API" ออกจากโมเดลฐานข้อมูล</p>
+  <div class="two">
+    <div class="panel"><h4>ประโยชน์</h4><ul><li>ไม่เผลอเปิดเผย field ที่ละเอียดอ่อน</li><li>Response สม่ำเสมอ</li><li>validate และเขียน doc ง่ายขึ้น</li><li>ลดการผูก DB กับ client (coupling)</li></ul></div>
+    <div class="panel"><h4>3 สิ่งที่ต้องแยกให้ออก</h4><ul><li><b>Entity</b>: ข้อมูลที่เก็บใน DB</li><li><b>Request DTO</b>: ข้อมูลที่ client ส่งเข้ามา</li><li><b>Response DTO</b>: ข้อมูลที่ API ส่งออก</li></ul></div>
+  </div>
+
+  <figure>
+    <div class="two">
+      <div class="panel"><h4>Entity (ตารางใน DB)</h4>
+        <div class="flow" style="justify-content:flex-start">
+          <span class="pill">id</span><span class="pill">name</span><span class="pill">email</span><span class="pill">role</span>
+          <span class="pill" style="border-color:var(--bad);color:var(--bad);text-decoration:line-through">password_hash</span><span class="pill">created_at</span></div></div>
+      <div class="panel"><h4>User Response DTO</h4>
+        <div class="flow" style="justify-content:flex-start">
+          <span class="pill" style="border-color:var(--good)">id</span><span class="pill" style="border-color:var(--good)">name</span><span class="pill" style="border-color:var(--good)">email</span><span class="pill" style="border-color:var(--good)">role</span></div>
+        <p style="font-size:14px;margin:8px 0 0"><b>ห้ามส่ง</b> <code>password_hash</code> กลับไปเด็ดขาด</p></div>
+    </div>
+  </figure>
+
+  <h3>7.7 Mapper: แปลง Entity เป็น DTO</h3>
+  <figure>
+    <div class="flow">
+      <div class="node g">Repository<small>คืน Entity</small></div><div class="arr">→</div>
+      <div class="node w">Service + Mapper<small>แปลงเป็น DTO</small></div><div class="arr">→</div>
+      <div class="node a">Controller<small>ส่ง DTO</small></div><div class="arr">→</div>
+      <div class="node">Front-End<small>DTO ชนิด 1 … n</small></div>
+    </div>
+    <figcaption>Entity ชุดเดียวทำ DTO ได้หลายเวอร์ชัน เช่น แบบสรุป (list) และแบบเต็ม (detail)</figcaption>
+  </figure>
+<pre><code><span class="k">export default class</span> ProductMapper {
+  <span class="k">static</span> toSummaryDTO(e) {                 <span class="c">// ใช้กับรายการ</span>
+    <span class="k">return</span> { id: e.productCode, name: e.productName, scale: e.productScale, retailPrice: e.MSRP };
+  }
+  <span class="k">static</span> toDetailDTO(e) {                  <span class="c">// ใช้กับรายละเอียด</span>
+    <span class="k">const</span> { MSRP, buyPrice, ...data } = e;
+    <span class="k">return</span> { ...data, retailPrice: MSRP, price: buyPrice };
+  }
+}</code></pre>
+  <p>Route เลือกชนิด DTO ผ่าน query <code>?view=summary|full</code> (list ใช้ summary เป็นค่าเริ่มต้น, รายตัวใช้ full)</p>
+  <div class="note bad"><b class="tag">จุดที่ต้องระวังในโค้ดสไลด์</b><p><code>getObject(id, viewType)</code> ใน Product Service เรียก <code>mapper.map(await repo.findOne(id))</code> โดยไม่ส่ง <code>viewType</code> ไปด้วย ทำให้ได้ DTO แบบ detail เสมอ ควรส่งเป็น <code>mapper.map(entity, viewType)</code></p></div>
+
+  <h3>7.8 ภาพรวม: ประกอบกันทั้งหมด</h3>
+  <figure>
+    <div class="stack" style="max-width:560px">
+      <div class="node a"><b>Route / Controller</b><small>อ่าน <code>req.pagination</code> และ <code>?view</code> → เรียก service → <code>apiResponse()</code></small></div><div class="arr">↓ ↑</div>
+      <div class="node w"><b>Service + Mapper</b><small>entities → DTOs (คงค่า <code>totalItems</code> ไว้)</small></div><div class="arr">↓ ↑</div>
+      <div class="node g"><b>Repository</b><small><code>LIMIT ? OFFSET ?</code> + <code>COUNT(*)</code> · ไม่พบ → throw <code>AppError(404)</code></small></div>
+    </div>
+    <figcaption><code>queryParser()</code> ต้องถูก <code>app.use()</code> ก่อน router · <code>apiResponse</code> ห่อผลลัพธ์เป็น <code>{success, data, pagination?, timestamp}</code></figcaption>
+  </figure>
+</section>
+
+<!-- ============ CHEAT ============ -->
+<section id="cheat">
+  <div class="week">Review</div>
+  <h2>สรุปท้ายเล่มและคำถามทบทวน</h2>
+  <div class="tbl"><table>
+    <tr><th>เรื่อง</th><th>จำให้ได้</th></tr>
+    <tr><td>Node.js</td><td>Runtime ไม่ใช่ภาษา · single thread + event loop · non-blocking</td></tr>
+    <tr><td>REST</td><td>6 constraints · Stateless · URI เป็นคำนามพหูพจน์ · verb บอก action</td></tr>
+    <tr><td>Express</td><td>Routing + Middleware · <code>req.params / query / body</code> · <code>res.status().json()</code></td></tr>
+    <tr><td>3 Layers</td><td>Controller (HTTP) → Service (logic) → Repository (data)</td></tr>
+    <tr><td>DB</td><td>Pool · <code>[rows, fields]</code> · <code>?</code> placeholder กัน SQL Injection</td></tr>
+    <tr><td>Error</td><td><code>next(err)</code> → handler 4 พารามิเตอร์ ประกาศท้ายสุด · AppError</td></tr>
+    <tr><td>Pagination</td><td><code>offset = (page-1) × limit</code> · จำกัด limit · ส่ง metadata</td></tr>
+    <tr><td>DTO</td><td>Entity ≠ DTO · ไม่ส่ง field ลับ · Mapper แปลงให้</td></tr>
+  </table></div>
+
+  <h3>ทดสอบตัวเอง</h3>
+  <details><summary>Stateless หมายถึงอะไร</summary><p>ทุก request ต้องมีข้อมูลที่จำเป็นครบในตัวเอง server ไม่เก็บ context ของ request ก่อนหน้า client เป็นผู้เก็บ session state</p></details>
+  <details><summary>ต่างกันอย่างไรระหว่าง 401 และ 403</summary><p>401 คือยังไม่ผ่านการยืนยันตัวตน 403 คือยืนยันแล้วแต่ไม่มีสิทธิ์เข้าถึง resource</p></details>
+  <details><summary>ทำไม <code>res.status(404)</code> อย่างเดียวถึงไม่ส่ง response</summary><p>มันแค่ตั้ง status code แล้วคืน object <code>res</code> ต้องต่อด้วย <code>.json()</code>, <code>.send()</code> หรือ <code>.end()</code> จึงจะส่ง</p></details>
+  <details><summary>หน้าที่ของ Service Layer และสิ่งที่ห้ามมีคืออะไร</summary><p>เก็บ business logic, validation, การคำนวณ และประสานงานหลาย repository ห้ามมีรายละเอียด HTTP (req/res) หรือโค้ด DB ตรงๆ</p></details>
+  <details><summary>เขียน offset ของ page 5, limit 20</summary><p>(5 − 1) × 20 = <b>80</b> ดึง record ลำดับที่ 81-100</p></details>
+  <details><summary>ทำไมไม่ควรส่ง Entity กลับ client ตรงๆ</summary><p>อาจเปิดเผย field ที่ละเอียดอ่อน เช่น <code>password_hash</code> และทำให้ API ผูกกับโครงสร้าง DB ใช้ DTO กำหนดรูปร่างข้อมูลที่ส่งออกอย่างชัดเจน</p></details>
+  <details><summary>Error-handling middleware ต่างจาก middleware ปกติอย่างไร และต้องวางที่ไหน</summary><p>มี 4 พารามิเตอร์ <code>(err, req, res, next)</code> และต้องประกาศท้ายสุดหลัง route และ middleware อื่นทั้งหมด</p></details>
+  <details><summary>Prepared statement ป้องกัน SQL Injection ได้อย่างไร</summary><p>แยกคำสั่ง SQL กับค่าออกจากกัน ค่าที่ user ส่งมาถูกมองเป็นข้อมูล ไม่ถูกตีความเป็นส่วนหนึ่งของคำสั่ง</p></details>
+
+  <footer>สรุปจากสไลด์ INT161 (Intro, HTTP Basics, REST API, DB Connection, Express, Error Handling, Pagination and DTO) กล่อง "เสริม" เป็นเนื้อหาเพิ่มเติม ควรเทียบกับที่อาจารย์สอนอีกครั้งก่อนสอบ</footer>
+</section>
+</div>
+
+<script>
+(function(){
+  var pg=document.getElementById('pg'),lm=document.getElementById('lm'),tt=document.getElementById('tt'),
+      grid=document.getElementById('grid'),out=document.getElementById('out');
+  function draw(){
+    var page=Math.max(parseInt(pg.value)||1,1),limit=Math.min(Math.max(parseInt(lm.value)||1,1),100),
+        total=Math.max(parseInt(tt.value)||0,0),offset=(page-1)*limit,pages=Math.ceil(total/limit);
+    var show=Math.min(total,100),h='';
+    for(var i=1;i<=show;i++)h+='<i'+(i>offset&&i<=offset+limit?' class="on"':'')+'>'+i+'</i>';
+    grid.innerHTML=h;
+    out.textContent='offset = ('+page+' - 1) x '+limit+' = '+offset+' | totalPages = '+pages+' | hasNext = '+(page*limit<total)+' | hasPrev = '+(page>1);
+  }
+  [pg,lm,tt].forEach(function(e){e.addEventListener('input',draw)});
+  draw();
+})();
+</script>
+
+</body></html>
